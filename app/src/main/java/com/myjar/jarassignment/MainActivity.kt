@@ -11,9 +11,11 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.myjar.jarassignment.data.database.RealmModule
 import com.myjar.jarassignment.data.model.ComputerItem
 import com.myjar.jarassignment.ui.adapter.ItemAdapter
 import com.myjar.jarassignment.ui.vm.JarViewModel
+import io.realm.Realm
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.launch
@@ -21,6 +23,7 @@ import kotlinx.coroutines.launch
 class MainActivity : ComponentActivity() {
 
     private val viewModel by viewModels<JarViewModel>()
+    private lateinit var realmDB: Realm
     private lateinit var adapter: ListAdapter<ComputerItem, *>
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -28,14 +31,20 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContentView(R.layout.activity_main)
 
+        initDB()
         setupUi()
         observeFlows()
+    }
+
+    private fun initDB() {
+       realmDB = RealmModule.provideRealmInstance(applicationContext)
     }
 
     private fun observeFlows() {
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.RESUMED) {
                 viewModel.listStringData.collectLatest {
+                    viewModel.saveListToDB(realmDB, it)
                     adapter.submitList(it)
                 }
             }

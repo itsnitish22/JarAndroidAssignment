@@ -1,11 +1,15 @@
 package com.myjar.jarassignment.ui.vm
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.gson.Gson
 import com.myjar.jarassignment.createRetrofit
 import com.myjar.jarassignment.data.model.ComputerItem
+import com.myjar.jarassignment.data.model.MainPhoneListResponse
 import com.myjar.jarassignment.data.repository.JarRepository
 import com.myjar.jarassignment.data.repository.JarRepositoryImpl
+import io.realm.Realm
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -28,6 +32,24 @@ class JarViewModel : ViewModel() {
             if (response.isNotEmpty()) {
                 _listStringData.emit(response)
             }
+        }
+    }
+
+    fun saveListToDB(realmDB: Realm, response: List<ComputerItem>) {
+        try {
+            realmDB.executeTransaction {
+                it.delete(MainPhoneListResponse::class.java)
+                it.insertOrUpdate(
+                    MainPhoneListResponse(
+                        computerItemData = Gson().toJson(
+                            response
+                        )
+                    )
+                )
+            }
+            Log.d("ViewModel", "DBStoredSuccess")
+        } catch (e: Exception) {
+            Log.e("ViewModel", "${e.message}")
         }
     }
 
