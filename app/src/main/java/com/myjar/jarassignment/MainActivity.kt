@@ -15,6 +15,7 @@ import com.myjar.jarassignment.data.database.RealmModule
 import com.myjar.jarassignment.data.model.ComputerItem
 import com.myjar.jarassignment.ui.adapter.ItemAdapter
 import com.myjar.jarassignment.ui.vm.JarViewModel
+import com.myjar.jarassignment.utils.EventObserver
 import io.realm.Realm
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.filterNotNull
@@ -37,14 +38,15 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun initDB() {
-       realmDB = RealmModule.provideRealmInstance(applicationContext)
+        realmDB = RealmModule.provideRealmInstance(applicationContext)
     }
 
     private fun observeFlows() {
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.RESUMED) {
                 viewModel.listStringData.collectLatest {
-                    viewModel.saveListToDB(realmDB, it)
+                    if (it.isNotEmpty())
+                        viewModel.saveListToDB(realmDB, it)
                     adapter.submitList(it)
                 }
             }
@@ -59,6 +61,17 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+
+
+        viewModel.startFetchingFromDB.observe(this, EventObserver {
+            it?.let { startFetchingFromDB ->
+                if (startFetchingFromDB) {
+                    lifecycleScope.launch {
+                        viewModel.getQuestionnaireDataFromDB(realmDB)
+                    }
+                }
+            }
+        })
     }
 
     private fun setupUi() {
