@@ -1,6 +1,8 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
+    id("kotlin-kapt")
+    id("realm-android")
 }
 
 android {
@@ -71,5 +73,5 @@ dependencies {
     debugImplementation(libs.androidx.ui.test.manifest)
     implementation (libs.retrofit)
     implementation (libs.retrofit.gson.convertor)
-
+    implementation(libs.library.base)
 }
