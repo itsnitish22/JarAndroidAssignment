@@ -42,7 +42,7 @@ class MainActivity : ComponentActivity() {
         }
 
         lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.RESUMED) {
+            repeatOnLifecycle(Lifecycle.State.CREATED) {
                 viewModel.navigateToItem.filterNotNull().collectLatest {
                     val intent = Intent(this@MainActivity, DetailActivity::class.java)
                     intent.putExtra("itemId", it)
