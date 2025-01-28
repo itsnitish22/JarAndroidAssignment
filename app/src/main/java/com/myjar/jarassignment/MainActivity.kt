@@ -2,8 +2,8 @@ package com.myjar.jarassignment
 
 import android.content.Intent
 import android.os.Bundle
+import android.widget.SearchView
 import androidx.activity.ComponentActivity
-import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
@@ -29,7 +29,6 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
         setContentView(R.layout.activity_main)
 
         initDB()
@@ -76,13 +75,41 @@ class MainActivity : ComponentActivity() {
 
     private fun setupUi() {
         val recyclerView: RecyclerView = findViewById(R.id.item_list)
+        val searchView: SearchView = findViewById(R.id.search_view)
+
         adapter = ItemAdapter { selectedItem ->
             viewModel.navigateToItemDetail(selectedItem.id)
         }
 
         recyclerView.adapter = adapter
         recyclerView.layoutManager = LinearLayoutManager(this)
+
+        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String?): Boolean {
+                return false
+            }
+
+            override fun onQueryTextChange(newText: String?): Boolean {
+                filterItems(newText.orEmpty())
+                return true
+            }
+        })
     }
+
+    private fun filterItems(query: String) {
+        lifecycleScope.launch {
+            val allItems = viewModel.listStringData.value
+            val filteredList = if (query.isNotEmpty()) {
+                allItems.filter {
+                    it.name.contains(query, ignoreCase = true)
+                }
+            } else {
+                allItems
+            }
+            adapter.submitList(filteredList)
+        }
+    }
+
 
     override fun onResume() {
         super.onResume()
