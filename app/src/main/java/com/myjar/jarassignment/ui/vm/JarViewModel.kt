@@ -24,7 +24,10 @@ class JarViewModel : ViewModel() {
 
     fun fetchData() {
         viewModelScope.launch {
-            repository.fetchResults()
+            val response = repository.fetchResults()
+            if (response.isNotEmpty()) {
+                _listStringData.emit(response)
+            }
         }
     }
 
@@ -33,4 +36,5 @@ class JarViewModel : ViewModel() {
             _navigateToItem.emit(id)
         }
     }
+
 }

@@ -34,8 +34,10 @@ class MainActivity : ComponentActivity() {
 
     private fun observeFlows() {
         lifecycleScope.launch {
-            viewModel.listStringData.collectLatest {
-                adapter.submitList(it)
+            repeatOnLifecycle(Lifecycle.State.RESUMED) {
+                viewModel.listStringData.collectLatest {
+                    adapter.submitList(it)
+                }
             }
         }
 
@@ -56,6 +58,7 @@ class MainActivity : ComponentActivity() {
             viewModel.navigateToItemDetail(selectedItem.id)
         }
 
+        recyclerView.adapter = adapter
         recyclerView.layoutManager = LinearLayoutManager(this)
     }
 
