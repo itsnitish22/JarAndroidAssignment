@@ -37,10 +37,7 @@ class JarViewModel : ViewModel() {
     fun fetchData() {
         viewModelScope.launch {
             try {
-                val response = repository.fetchResults()
-                if (response.isNotEmpty()) {
-                    _listStringData.emit(response)
-                }
+                repository.fetchResults().collect(_listStringData::emit)
             } catch (e: Exception) {
                 _startFetchingFromDB.postValue(SingleEvent(true))
                 Log.e("ViewModel", "Something went wrong!")
